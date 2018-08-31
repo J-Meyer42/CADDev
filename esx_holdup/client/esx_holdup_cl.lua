@@ -129,7 +129,10 @@ Citizen.CreateThread(function()
 						end
 						incircle = true
 						if IsControlJustReleased(1, 51) and CheckWeapon(ped) then
-							TriggerServerEvent('esx_holdup:rob', k)
+						---Coords to streetname conversion for SauceCAD:
+							local var, var2   = GetStreetNameAtCoord(pos2.x, pos2.y, pos2.z, Citizen.ResultAsInteger(), Citizen.ResultAsInteger())
+							local location    = tostring(GetStreetNameFromHashKey(var)) .. ", " .. tostring(GetStreetNameFromHashKey(var2))
+							TriggerServerEvent('esx_holdup:rob', k, location) --Make sure to add location to the event if you want it to passthrough to the CAD/MDT. 
 						end
 					elseif(Vdist(pos.x, pos.y, pos.z, pos2.x, pos2.y, pos2.z) > 1.0)then
 						incircle = false

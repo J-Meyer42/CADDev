@@ -255,7 +255,7 @@ AddEventHandler('esx_phone:reload', function(phoneNumber)
 end)
 
 RegisterServerEvent('esx_phone:send')
-AddEventHandler('esx_phone:send', function(phoneNumber, message, anon, position)
+AddEventHandler('esx_phone:send', function(phoneNumber, message, anon, position, location)
 
   local _source = source
   local xPlayer = ESX.GetPlayerFromId(_source)
@@ -275,10 +275,24 @@ AddEventHandler('esx_phone:send', function(phoneNumber, message, anon, position)
 
       if numHidePosIfAnon and anon then
         numPosition = false
+		numPly = 0
+		--location = 'Unknown' --Can be uncommented if you want locations to also be anonymous on anon calls.
+	  else
+		numPly = xPlayer.get('phoneNumber')
       end
 
       if numHasDispatch then
         TriggerClientEvent('esx_phone:onMessage', numSource, xPlayer.get('phoneNumber'), message, numPosition, (numHide and true or anon), numType, GetDistpatchRequestId())
+				
+		sendToCAD({
+			id = 'GreenLeafRP', --Change to your community ID
+			key = 'YVJG0PAWYP', --Change to your SauceCAD API key
+			ctype = callChecker(numType), --Make sure this matches one of the allowed API passthroughs
+			situation = message,
+			location = location,
+            phone = numPly            
+          })
+		  
       else
         TriggerClientEvent('esx_phone:onMessage', numSource, xPlayer.get('phoneNumber'), message, numPosition, (numHide and true or anon), numType, false)
       end
@@ -422,3 +436,28 @@ AddEventHandler('esx_phone:bankTransfer', function(target, amount)
   end
 
 end)
+
+local allowedCallers = { 
+	['Mechanic Customer'] = 'Tow', --Alarm, Tow, Police, Medical, Fire, Lawyer, Taxi are the currently planned api passthroughs view current available ctypes at: https://saucecad.com/api/
+	['Alert police'] = 'Police',
+	['Medical Alert'] = 'Medical', 
+	--Example: ['PhoneNumbers[phoneNumber].type goes here'] = 'api passthrough goes here',
+}
+
+function callChecker(numType)
+    local isValid = nil 
+    for calltype,newtype in pairs(allowedCallers) do
+       if numType == calltype then
+            isValid = newtype
+			-- print('calltype: '..newtype) --Example code used to capture the job's PhoneNumbers[phoneNumber].type for addition to the allowedCallers table.
+            break
+       end
+    end
+    return isValid
+end
+
+--Do not edit this function or you will break data passthrough to the CAD.
+function sendToCAD (Data)
+  PerformHttpRequest('https://saucecad.com/mdt/handler/', function(err, text, headers) end, 'POST', json.encode(Data), { ['Content-Type'] = 'application/json' })
+end
+--Do not edit this function or you will break data passthrough to the CAD.

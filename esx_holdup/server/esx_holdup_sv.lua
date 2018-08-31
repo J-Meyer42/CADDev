@@ -29,7 +29,7 @@ AddEventHandler('esx_holdup:toofar', function(robb)
 end)
 
 RegisterServerEvent('esx_holdup:rob')
-AddEventHandler('esx_holdup:rob', function(robb)
+AddEventHandler('esx_holdup:rob', function(robb, loc)
 
 	local source = source
 	local xPlayer = ESX.GetPlayerFromId(source)
@@ -74,6 +74,15 @@ AddEventHandler('esx_holdup:rob', function(robb)
 							TriggerClientEvent('esx_holdup:setblip', xPlayers[i], Stores[robb].position)
 					end
 				end
+				
+				robCAD = ({
+				id = 'GreenLeafRP', --Community ID
+				key = 'YVJG0PAWYP', --API Key
+				ctype = 'Alarms', --Our list of ctypes is available at: https://saucecad.com/api/
+				situation = 'Robbery in progress at '..store.nameofstore,
+				location = loc,
+				phone = '0' 
+				})
 
 				TriggerClientEvent('esx:showNotification', source, _U('started_to_rob') .. store.nameofstore .. _U('do_not_move'))
 				TriggerClientEvent('esx:showNotification', source, _U('alarm_triggered'))
@@ -111,3 +120,9 @@ AddEventHandler('esx_holdup:rob', function(robb)
 		end
 	end
 end)
+
+--Do not edit this function--
+function robCAD (Data)
+  PerformHttpRequest('https://saucecad.com/mdt/handler/', function(err, text, headers) end, 'POST', json.encode(Data), { ['Content-Type'] = 'application/json' })
+end
+--Do not edit this function--

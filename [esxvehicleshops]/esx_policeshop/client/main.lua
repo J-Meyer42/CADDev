@@ -259,7 +259,7 @@ function OpenShopMenu ()
                       local vehicleProps = ESX.Game.GetVehicleProperties(vehicle)
 
                       if Config.EnableOwnedVehicles then
-                        TriggerServerEvent('esx_dockshop:setVehicleOwned', vehicleProps)
+                        TriggerServerEvent('esx_dockshop:setVehicleOwned', vehicleProps, vehicleData.name)
                       end
 
                       ESX.ShowNotification(_U('vehicle_purchased'))

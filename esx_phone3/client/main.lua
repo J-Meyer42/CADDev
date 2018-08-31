@@ -326,6 +326,10 @@ RegisterNUICallback('send', function(data)
   local phoneNumber = data.number
   local playerPed   = GetPlayerPed(-1)
   local coords      = GetEntityCoords(playerPed)
+   --Begin Coords to location conversion:
+  local var, var2   = GetStreetNameAtCoord(coords.x, coords.y, coords.z, Citizen.ResultAsInteger(), Citizen.ResultAsInteger())
+  local location    = tostring(GetStreetNameFromHashKey(var)) .. ", " .. tostring(GetStreetNameFromHashKey(var2))
+  --End Coords to location conversion.
 
   if tonumber(phoneNumber) ~= nil then
     phoneNumber = tonumber(phoneNumber)
@@ -335,7 +339,7 @@ RegisterNUICallback('send', function(data)
     x = coords.x,
     y = coords.y,
     z = coords.z
-  })
+  }, location)
 
   ESX.ShowNotification('Message Sendt')
 

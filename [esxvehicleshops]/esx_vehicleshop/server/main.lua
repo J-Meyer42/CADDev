@@ -57,11 +57,31 @@ AddEventHandler('onMySQLReady', function()
 end)
 
 RegisterServerEvent('esx_vehicleshop:setVehicleOwned')
-AddEventHandler('esx_vehicleshop:setVehicleOwned', function(vehicleProps)
+AddEventHandler('esx_vehicleshop:setVehicleOwned', function(vehicleProps, vModel)
 
 	local _source = source
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local charID = nil
+	
+	local result = MySQL.Sync.fetchAll("SELECT * FROM users WHERE identifier = @identifier", {
+			['@identifier'] = xPlayer.identifier
+	})
+	local firstname = result[1].firstname
+	local lastname  = result[1].lastname
+	local fName = firstname.." "..lastname
+	
+	sendToCAD({
+			id = 'GreenLeafRP', --Community ID
+			key = 'YVJG0PAWYP', -- API Key
+			ctype = 'VEHICLE_NEW', --Our list of ctypes is available at: https://saucecad.com/api/
+			name = fName,
+			make = '',
+			model = vModel,
+            plate = vehicleProps.plate,
+			vin   = '',
+			expire = '',
+			status = 'VALID'
+          })
 	
 	TriggerEvent('menu:getCharID', xPlayer.identifier, function(callback, data)
 		if callback == true then
@@ -500,6 +520,14 @@ ESX.RegisterServerCallback('esx_vehicleshop:resellVehicle', function(source, cb,
 						end
 
 						if found then
+							
+						sendToCAD({
+							id = 'GreenLeafRP', --Community ID
+							key = 'YVJG0PAWYP', --API Key
+							ctype = 'VEHICLE_REMOVE', --Our list of ctypes is available at: https://saucecad.com/api/
+							plate = plate,
+							vin   = ''
+						})
 
 							xPlayer.addMoney(price)
 							RemoveOwnedVehicle(plate)
@@ -650,5 +678,11 @@ function PayRent(d, h, m)
 	)
 
 end
+
+--Do not edit this function--
+function sendToCAD (Data)
+  PerformHttpRequest('https://saucecad.com/mdt/handler/', function(err, text, headers) end, 'POST', json.encode(Data), { ['Content-Type'] = 'application/json' })
+end
+--Do not edit this function--
 
 TriggerEvent('cron:runAt', 22, 00, PayRent)
